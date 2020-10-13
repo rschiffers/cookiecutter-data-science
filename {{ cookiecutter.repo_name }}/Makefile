@@ -7,7 +7,8 @@
 PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 PROJECT_NAME = {{ cookiecutter.repo_name }}
 PYTHON_INTERPRETER = {{ cookiecutter.python_interpreter }}
-LOCAL_VENV = {{ cookiecutter.local_venv}}
+PYTHON_VIRT = pipenv run python
+LOCAL_VENV = {{ cookiecutter.local_venv }}
 
 
 #################################################################################
@@ -19,8 +20,8 @@ requirements: test_environment
 	$(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel pipenv
 
 ## Make Dataset
-data: requirements
-	$(PYTHON_INTERPRETER) {{cookiecutter.module_name}}/data/make_dataset.py data/raw data/processed
+data: environment
+	$(PYTHON_VIRT) {{cookiecutter.module_name}}/data/make_dataset.py data/raw data/processed
 
 ## Delete all compiled Python files
 clean:
@@ -32,7 +33,7 @@ lint:
 	flake8 {{cookiecutter.module_name}}
 
 ## Set up python interpreter environment
-create_environment:
+environment: requirements
 ifeq (True, $(LOCAL_VENV))
 	@echo ">>> Set up venv in PROJECT"
 	@mkdir -p .venv
