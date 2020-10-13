@@ -1,4 +1,4 @@
-.PHONY: clean data lint requirements
+.PHONY: clean data environment lint requirements
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -19,6 +19,15 @@ LOCAL_VENV = {{ cookiecutter.local_venv }}
 requirements: test_environment
 	$(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel pipenv
 
+## Set up python interpreter environment
+environment: requirements
+ifeq (True, $(LOCAL_VENV))
+	@echo ">>> Set up venv in PROJECT"
+	@mkdir -p .venv
+endif
+	@pipenv install --dev
+	@pipenv install -e .
+
 ## Make Dataset
 data: environment
 	$(PYTHON_VIRT) {{cookiecutter.module_name}}/data/make_dataset.py data/raw data/processed
@@ -31,14 +40,6 @@ clean:
 ## Lint using flake8
 lint:
 	flake8 {{cookiecutter.module_name}}
-
-## Set up python interpreter environment
-environment: requirements
-ifeq (True, $(LOCAL_VENV))
-	@echo ">>> Set up venv in PROJECT"
-	@mkdir -p .venv
-endif
-	@pipenv install
 
 ## Test python environment is setup correctly
 test_environment:
